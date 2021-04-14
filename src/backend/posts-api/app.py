@@ -7,7 +7,8 @@ app = FastAPI()
 
 def getUsers(postId):
     try:
-        user_data = requests.get('http://localhost:8000/users')
+        user_uri = db_uri = os.getenv('USER_URI')  or 'http://localhost:8000/users'
+        user_data = requests.get(user_uri)
         post_author = []
         for user in user_data.json():
             if postId in user['postId']:
