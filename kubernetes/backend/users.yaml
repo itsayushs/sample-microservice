@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userapi
+  labels:
+    app: userapi
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userapi
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: userapi
+        type: backend
+    spec:
+      initContainers:
+      - name: init-myservice
+        image: ayushl33t/users-api:latest
+        command: ['sh', '-c', 'python backend/users-api/seed-db.py']
+        env:
+          - name: DB_URI
+            value: "users-db"
+          - name: DB_USER
+            value: "toor"
+          - name: DB_PASS
+            value: "noob"
+      containers:
+      - name: userapi
+        image: ayushl33t/users-api:latest
+        env:
+          - name: DB_URI
+            value: "users-db"
+          - name: DB_USER
+            value: "toor"
+          - name: DB_PASS
+            value: "noob"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: userapi
+spec:
+  selector:
+    app: userapi
+    type: backend
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

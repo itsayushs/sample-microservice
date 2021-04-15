@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-db
+  labels:
+    app: users-db
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-db
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: users-db
+        type: backend
+    spec:
+      containers:
+      - name: users-db
+        image: mongo:latest
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: "toor"
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: "noob"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-db
+spec:
+  selector:
+      app: users-db
+      type: backend
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017

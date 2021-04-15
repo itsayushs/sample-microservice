@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postapi
+  labels:
+    app: postapi
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postapi
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: postapi
+        type: backend
+    spec:
+      initContainers:
+      - name: init-myservice
+        image: ayushl33t/posts-api:latest
+        command: ['sh', '-c', 'python backend/posts-api/seed-db.py']
+        env:
+          - name: DB_URI
+            value: "users-db"
+          - name: DB_USER
+            value: "toor"
+          - name: DB_PASS
+            value: "noob"
+          - name: USER_URI
+            value: "http://userapi:8000/users"
+      containers:
+      - name: postapi
+        image: ayushl33t/posts-api:latest
+        env:
+          - name: DB_URI
+            value: "users-db"
+          - name: DB_USER
+            value: "toor"
+          - name: DB_PASS
+            value: "noob"
+          - name: USER_URI
+            value: "http://userapi:8000/users"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postapi
+spec:
+  selector:
+    app: postapi
+    type: backend
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
